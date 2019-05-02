@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { string } from 'prop-types';
-import { extract } from 'oembed-parser';
 
 function Embed({ url }) {
   const [html, setHtml] = useState('');
 
   useEffect(() => {
     if (url) {
-      extract(url)
+      const encodedUrl = encodeURIComponent(url);
+      fetch(`https://noembed.com/embed?url=${encodedUrl}`)
+        .then(response => {
+          if (!response.ok) {
+            setHtml('');
+            throw new Error('Response was not ok');
+          }
+
+          if (!response.json) {
+            setHtml('');
+            throw new Error('No json in response');
+          }
+
+          return response.json();
+        })
         .then(data => {
           if (!data.html) {
             setHtml('');
